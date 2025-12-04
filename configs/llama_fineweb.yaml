@@ -1,0 +1,52 @@
+defaults:
+  - default
+  - _self_
+
+num_evals: 100
+token_per_param: 20
+T_eval: 5_242_880
+ds_path: fineweb100B
+base_model_checkpoint_path: wandb_model_checkpoints
+ckpt: true
+checkpoint_features: false
+checkpoint_frequency: 1000
+
+model:
+  mlp_expansion: 4
+  L: 1024
+  dtype: bfloat16
+  D: 512 # Need to scale
+  base_D: 512
+  dh: 64 # 8 heads
+  N: 32
+  base_N: 32
+  V: 50257
+  fsdp_enabled: false
+  tp_dim: 1
+  gradient_checkpointing: true
+  swiglu: true
+  rope: true
+
+opt:
+  name: adam
+  B: 128
+  base_B: 128
+  lr: 0.4
+  eps: 1e-10
+  b1: 0.9
+  b2: 0.95
+  t1: null
+  t2: null
+  freq: 10 # precondition freq, already exist in the repo
+  warmup_tokens: 0.05 # 5% of warmup steps
+  schedule: linear
+  depth_mup: true
+  mup: true
+  scale_eps: true
+
+  block_size: 10000 # no need to block
+  eigh_warmup_steps: 50 # more accurate eigenbasis for the first few steps
+  # eps: 1e-8 # (eigenbasis) adam eps inside soap
+  matrix_eps: 1e-10 # eps in QR decomposition
+  max_precond_dim: 10000 # to exclude vocab dim
+  rel_eps: false # if true, make adam eps relative. doesn't work well

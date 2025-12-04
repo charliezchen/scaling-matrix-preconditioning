@@ -1,0 +1,44 @@
+defaults:
+    - default
+    - _self_
+
+num_evals: 1000
+T: 1_000_000_000
+T_eval: 100_000
+ds_path: fourier
+wandb_project: picodo
+wandb_tag: mlp
+wandb_mode: online
+arch: mlp
+
+model:
+  D: 128
+  mlp_expansion: 1
+  L: 1
+  N: 3
+  dtype: null
+  V: 8
+
+opt:
+  name: adam
+  B: 4096
+  lr: 0.4
+  eps: 1e-6
+  b1: 0.9
+  b2: 0.95
+  t1: null
+  t2: null
+  freq: 10
+  warmup_tokens: 10_000_000
+  mup: true
+  depth_mup: null
+  scale_eps: null
+  schedule: linear
+
+hessian:
+  enabled: false
+  k: 10
+  order: 100
+  log_raw: true
+  log_lanczos: true
+  max_iter: 100

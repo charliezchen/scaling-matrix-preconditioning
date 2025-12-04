@@ -1,0 +1,91 @@
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+seed: 0
+token_per_param: null
+scale: null
+exponent: null
+T: null  # number of training tokens
+total_flops: null
+T_eval: null  # number of validation tokens
+num_evals: 100
+num_hessian_evals: 20
+ds_path: null
+shuffle_data: true
+wandb_project: optimization
+wandb_tag: test
+wandb_mode: online
+arch: transformer
+no_geom_eval_step: false
+base_model_checkpoint_path: null
+ckpt: false
+checkpoint_features: true
+checkpoint_frequency: 300
+benchmarking: false
+single_host: false
+tracing: false
+custom_ablation_str: null
+run_id: null
+bf16_momentum: false
+num_power_iter: 1
+
+model: # GPT2-small (124M params)
+  base_D: 128  # model/embed dim  = qkv dim
+  D: 768  # model/embed dim  = qkv dim
+  mlp_expansion: 4
+  dh: 64  # head dim
+  L: 768  # max context/sequence length
+  base_N: 3
+  N: 3  # number of transformer block layers
+  V: 50257  # vocab size -> must match dataset tokenizer!
+  embed_init_std: 0.1
+  init_std_mult: 1
+  fsdp_enabled: false
+  tp_dim: 1
+  gradient_checkpointing: false
+  dtype: null
+  depth_mup: true
+  aspect_ratio: null
+  block_size: 1024
+  swiglu: true
+  rope: true
+  use_flash_attn: false
+opt:
+  base_B: 512
+  B: 512  # batch size for both training and validation
+  B_max: 16384
+  lr: 0.4
+  embed_lr_mult: 1
+  readout_lr_mult: null # tie with embed_lr_mult
+  warmup_tokens: 0
+  eigh_warmup_steps: 50
+  schedule: const
+  decay_frac: 1.
+  b1: 0.9
+  b2: 0.95
+  eps: 1e-6
+  matrix_eps: 1e-4
+  rel_eps: false
+  adam_b1: null
+  adam_b2: null
+  adam_eps: null
+  t1: null
+  t2: null
+  freq: 10
+  weight_decay: 0.
+  wd_half_life: null
+  wdxD: null
+  scale_eps: null
+  mup: true
+  depth_mup: null
+  eigh: false
+  clip: 0
+  block_size: 100000000 # no blocking
+  max_precond_dim: 10000 # 10k, below typical vocab size
+  emb_norm: "rms"
+  hidden_norm: "spec"
+  readout_norm: "spec"
+
+

@@ -1,0 +1,67 @@
+program: main.py
+method: grid
+name: soap_scaling
+
+metric: {name: eval_loss, goal: minimize}
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - -cn
+  - llama_fineweb
+  - wandb_mode=online
+  - wandb_tag=llama_fineweb_v3
+  - wandb_project=llama_proj
+  - ckpt=true
+  - token_per_param=20
+  - opt.clip=1
+  - ${args_no_hyphens}
+
+parameters:
+  "opt.name":
+    values: ["spectral-soap"]
+
+
+  "model.base_D":
+    values: [512]
+  "model.D":
+    values: [512, 768, 1024, 1536]
+  "opt.block_size":
+    values: [512]
+
+  "custom_ablation_str":
+    values: ["None", "double_lr", "half_lr", "double_wd", "half_wd", "fix_warmup_ratio"]
+  
+
+  "opt.wdxD":
+    values: [0.1024]
+  
+  "opt.warmup_tokens":
+    values: [23210112] # 0.00625
+
+  "opt.eigh":
+    values: [true]
+
+  "opt.b1":
+    values: [0.9]
+  "opt.b2":
+    values: [0.999]
+
+  "opt.eps":
+    values: [1e-8]
+  "opt.matrix_eps":
+    values: [1e-10]
+  "opt.rel_eps":
+    values: [false]
+  
+  "opt.lr":
+    values: [0.032]
+
+  "opt.mup":
+    values: [True]
+  "opt.depth_mup":
+    values: [True]
+  "opt.scale_eps":
+    values: [True]
+

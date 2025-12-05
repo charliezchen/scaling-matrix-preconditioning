@@ -1,0 +1,65 @@
+program: main.py
+method: grid
+name: muon_optimal_tpp
+
+metric: {name: eval_loss, goal: minimize}
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - -cn
+  - llama_fineweb
+  - wandb_mode=online
+  - wandb_tag=llama_fineweb_v3
+  - wandb_project=llama_proj
+  - opt.clip=1
+  - ${args_no_hyphens}
+
+parameters:
+  "ckpt":
+    values: [true]
+
+  "model.base_D":
+    values: [512]
+  "model.D":
+    values: [1984]
+
+  "opt.lr":
+    values: [0.008]
+
+  "opt.weight_decay":
+    values: [0.000106667] # 0.00032 * 512 / 1536
+
+  "opt.embed_lr_mult":
+    values: [1.6] 
+
+  "opt.warmup_tokens":
+    values: [11140854]
+
+  "token_per_param":
+    values: [7.6]
+
+  "opt.name":
+    values: [muon_adam]
+    
+
+  "opt.mup":
+    values: [true]
+  "opt.depth_mup":
+    values: [true]
+  "opt.scale_eps":
+    values: [true]
+
+
+  "opt.b1":
+    values: [0.95]
+  "opt.eps":
+    values: [1e-5]
+  
+  "opt.adam_b1":
+    values: [0.8]
+  "opt.adam_b2":
+    values: [0.98]
+  "opt.adam_eps":
+    values: [1e-15]

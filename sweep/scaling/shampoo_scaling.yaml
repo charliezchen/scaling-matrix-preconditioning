@@ -1,0 +1,64 @@
+program: main.py
+method: grid
+name: shampoo_scaling
+
+metric: {name: eval_loss, goal: minimize}
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - -cn
+  - llama_fineweb
+  - wandb_mode=online
+  - wandb_tag=llama_fineweb_v3
+  - wandb_project=llama_proj
+  - opt.clip=1
+  - ${args_no_hyphens}
+
+parameters:
+  "ckpt":
+    values: [true]
+
+  "opt.name":
+    values: ["grafted_shampoo2_adam"]
+
+  "model.base_D":
+    values: [512]
+  "model.D":
+    values: [512, 768, 1024, 1536]
+  "custom_ablation_str":
+    values: ["None", "double_lr", "half_lr", "double_wd", "half_wd", "fix_warmup_ratio"]
+  "opt.block_size":
+    values: [512]
+  "opt.lr":
+    values: [0.002]
+  "opt.embed_lr_mult":
+    values: [32]
+
+  "opt.wdxD":
+    values: [0.1024] # 0.0002
+
+  "opt.warmup_tokens":
+    values: [185680896]
+  "opt.b1":
+    values: [0.95]
+  "opt.b2":
+    values: [0.98]
+  "opt.adam_eps":
+    values: [1e-08]
+  "opt.matrix_eps":
+    values: [1e-05]
+  "opt.rel_eps":
+    values: [True]
+  
+  "opt.mup":
+    values: [True]
+  "opt.depth_mup":
+    values: [True]
+  "opt.scale_eps":
+    values: [True]
+    
+  "token_per_param":
+    values: [20]
+

@@ -1,0 +1,67 @@
+program: main.py
+method: grid
+name: muon_scaling
+
+metric: {name: eval_loss, goal: minimize}
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - -cn
+  - llama_fineweb
+  - wandb_mode=online
+  - wandb_tag=llama_fineweb_v3
+  - wandb_project=llama_proj
+  - opt.clip=1
+  - ${args_no_hyphens}
+
+parameters:
+  "ckpt":
+    values: [true]
+
+  "model.base_D":
+    values: [512]
+  "model.D":
+    values: [512, 768, 1024, 1536]
+
+  "opt.lr":
+    values: [0.008]
+  "opt.embed_lr_mult":
+    values: [1.6] 
+
+  "opt.warmup_tokens":
+    values: [11140854]
+
+  "opt.wdxD":
+    values: [0.16384] # 0.00032
+
+  "opt.name":
+    values: [muon_adam]
+
+  "custom_ablation_str":
+    values: ["None", "double_lr", "half_lr", "double_wd", "half_wd", "fix_warmup_ratio"]
+    
+
+  "opt.mup":
+    values: [true]
+  "opt.depth_mup":
+    values: [true]
+  "opt.scale_eps":
+    values: [true]
+
+  "token_per_param":
+    values: [20]
+
+
+  "opt.b1":
+    values: [0.95]
+  "opt.eps":
+    values: [1e-5]
+  
+  "opt.adam_b1":
+    values: [0.8]
+  "opt.adam_b2":
+    values: [0.98]
+  "opt.adam_eps":
+    values: [1e-15]

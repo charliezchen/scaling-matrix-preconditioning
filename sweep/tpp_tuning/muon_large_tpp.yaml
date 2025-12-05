@@ -1,0 +1,72 @@
+program: main.py
+method: grid
+name: muon_large_tpp
+
+metric: {name: eval_loss, goal: minimize}
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - -cn
+  - llama_fineweb
+  - wandb_mode=online
+  - wandb_tag=llama_fineweb_v3
+  - wandb_project=llama_proj
+  - opt.clip=1
+  - ${args_no_hyphens}
+
+parameters:
+  "ckpt":
+    values: [true]
+
+  "model.base_D":
+    values: [512]
+  "model.D":
+    values: [896, 960, 1024, 1088, 1152, 1216, 1280, 1344]
+
+  "opt.lr":
+    values: [0.008]
+  "opt.weight_decay":
+    values: [0.00016] # 0.00032 * 512 / 1024
+
+  "opt.embed_lr_mult":
+    values: [1.6] 
+
+  "opt.warmup_tokens":
+    values: [0.003]
+
+  "total_flops":
+    values: [50382449858586869760]
+    # 50382449858586869760
+    # Flop per token: 1,312,458,752
+    # Num params: 639,797,248
+    # Tokens: 639,797,248*20
+    # Total Flops: flop per token * 3 * tokens = 50382449858586869760
+
+
+  "opt.name":
+    values: [muon_adam]
+    
+
+  "opt.mup":
+    values: [true]
+  "opt.depth_mup":
+    values: [true]
+  "opt.scale_eps":
+    values: [true]
+
+  "opt.b1":
+    values: [0.95]
+  "opt.eps":
+    values: [1e-5]
+  
+  "opt.adam_b1":
+    values: [0.8]
+  "opt.adam_b2":
+    values: [0.98]
+  "opt.adam_eps":
+    values: [1e-15]
+
+
+

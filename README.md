@@ -20,6 +20,15 @@ python plots/plot_scaling_frontier.py --preset tuned_tpp_panel_2_3
 python plots/fit_tpp.py
 ```
 
+## Download dataset
+To download the 30B tokens of fineweb dataset, run the following command
+```
+python cached_fineweb100B.py 300
+```
+
+To reproduce our runs, set `shuffle_data=true` (default), `seed=0` (default) and download exactly 30B tokens to ensure the validation set is the same set as we use for our experiments.
+
+
 ## Example runs
 
 ```bash

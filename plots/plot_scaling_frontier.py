@@ -71,6 +71,9 @@ OPTIMIZER_RUN_FILTERS = {
         "inc_mup": {"custom_sweep": "oct23_muon_inc_mup_scaling_v2"},
         "co": {"id": ["115af832", "085bed41", "e4d1d100", "2zqcavvi"]},
     },
+    "norm_muon": {
+        "mup": {"custom_sweep": "dec18_spectral_muon_adam_scaling"},
+    },
     "shampoo": {
         "mup": [
             {"custom_sweep": "nov28_shampoo_mup_with_abl", "custom_ablation_str": "None", "opt/block_size": 512},
@@ -83,18 +86,29 @@ OPTIMIZER_RUN_FILTERS = {
         "lr_only": {"custom_sweep": "nov30_shampoo_no_wd_scaling"},
         "wd_only": {"custom_sweep": "nov30_shampoo_wd_only_scaling"},
     },
-    "soap": {
+    "norm_shampoo": {
+        "mup": [{"custom_sweep": "dec15_spectral_shampoo_scaling"},
+                {"custom_sweep": "jan11_spectral_shampoo_xl"}],
+    },
+    "norm_soap": {
         "mup": [
-            {"run_id": ["24614bf8"]},
+            {"run_id": ["24614bf8", "2bd4aa55"]},
             {"custom_sweep": "nov28_soap_scaling_v2", "custom_ablation_str": "None", "opt/block_size": 512},
         ],
         "lr_only": [{"custom_sweep": "nov30_soap_no_wd_scaling"}],
         "wd_only": [{"custom_sweep": "nov30_soap_wd_only_scaling"}],
     },
+    "soap": {
+        "mup": {"id": ["b2222569", "d5a39aad", "d514d499", "61a7f710"]},
+        "sp": {"id": ["b2222569", "9648b658", "4d1a516a", "td6nxv61"]},
+        "lr_only": {"id": ["b2222569", "6d700075", "8751106d"]},
+        "wd_only": {"id": ["b2222569", "f7bbf2a7", "87bef55b"]}
+    },
 }
 
 COMPUTE_MULTIPLIER_SERIES = [("adam", "mup")]
 COMPUTE_MULTIPLIER_BASELINES = defaultdict(lambda: ("adam", "mup"))
+MODEL_SIZE_LABELS = ["190M", "380M", "640M", "1.4B"]
 
 KIND_LABELS = {
     "sp": "SP",
@@ -105,19 +119,45 @@ KIND_LABELS = {
     "inc_mup": "1/Width LR&WD",
 }
 
-DISPLAY_NAMES = {"muon": "Muon", "adam": "Adam", "shampoo": "Shampoo", "soap": "SOAP"}
+DISPLAY_NAMES = {
+    "muon": "Muon", 
+    "norm_muon": "Muon (norm)", 
+    "adam": "Adam", 
+    "shampoo": "Shampoo", 
+    "norm_shampoo": "Shampoo (norm)", 
+    "norm_soap": "SOAP (norm)", 
+    "soap": "SOAP"}
 
 OPT_NAME_MAP = {
     "muon_adam": "muon",
+    "spectral-muon_adam": "norm_muon",
     "adam": "adam",
     "grafted_shampoo2_adam": "shampoo",
-    "spectral-soap": "soap",
+    "spectral-grafted_shampoo2_adam": "norm_shampoo",
+    "spectral-grafted_shampoo2_manual_adam": "norm_shampoo",
+    "spectral-soap": "norm_soap",
+    "soap": "soap",
+    "soap_manual": "soap",
 }
 
 OPT_COLORS = {
     "adam": "#0083CB",
     "muon": "#F45A12",
+    "norm_muon": "#D07D57",
     "shampoo": "#00A879",
+    "norm_shampoo": "#66C5AAFF",
+    "soap": "#C313C4",
+    "norm_soap": "#CC79A7"
+}
+
+NORM_COLORS = {
+    "no_norm": "#0083CB",
+    "spectral_norm": "#F45A12",
+}
+
+NORM_LABELS = {
+    "no_norm": "$\\mu$P",
+    "spectral_norm": "Norm",
 }
 
 KIND_COLORS = {
@@ -143,24 +183,58 @@ class PlotConfig:
     legends_to_show: Optional[list] = None
     skip_pairs: Optional[list] = None
     plot_legend: bool = False
+    legend_loss: Optional[str] = None
+    legend_multiplier: Optional[str] = None
+    legend_mode: Optional[str] = None
+    legend_on_subplot: Optional[tuple[int, int]] = None
+    color_mode: Optional[str] = None
+    column_groups: Optional[list[tuple[str, list[str]]]] = None
+    subplot_wspace: float = 0.15
+    subplot_hspace: float = 0.15
     show_model_size: bool = True
     show_trajectories: bool = False
     y_min: float = 0.8
     y_max: float = 1.4
     markersize: int = 10
     edgewidth: int = 1
+    loss_alpha_mup: float = 0.95
+    loss_alpha_other: float = 0.6
+    line_width_scale: float = 1.0
 
 
 PRESETS = {
+    "all_mup": PlotConfig(
+        separate_plot=True,
+        kinds_to_visualize=["mup"],
+        optim_to_visualize=["adam", "shampoo", "norm_shampoo", "soap", "muon", "norm_muon", "norm_soap"],
+        plot_legend=False,
+        show_model_size=True,
+        y_min=0.8,
+        y_max=1.4,
+    ),
     "fig_6_panel_1_2": PlotConfig(
         separate_plot=True,
         kinds_to_visualize=["sp", "mup"],
-        optim_to_visualize=["adam", "shampoo", "muon"],
+        optim_to_visualize=["adam", "shampoo", "muon", 'soap'],
+        skip_pairs=[("adam", "sp")],
+        plot_legend=True,
+        legend_loss="optimizer",
+        legend_multiplier="linestyle",
+        show_model_size=True,
+        y_min=0.8,
+        y_max=1.4,
+        line_width_scale=0.8,
+    ),
+    "fig_6_panel_1_2_norm": PlotConfig(
+        separate_plot=True,
+        kinds_to_visualize=["sp", "mup"],
+        optim_to_visualize=["adam", "norm_shampoo", "norm_muon", 'norm_soap'],
         skip_pairs=[("adam", "sp")],
         plot_legend=True,
         show_model_size=True,
         y_min=0.8,
         y_max=1.4,
+        line_width_scale=0.8,
     ),
     "fig_6_panel_3": PlotConfig(
         separate_plot=True,
@@ -172,6 +246,7 @@ PRESETS = {
         show_model_size=True,
         y_min=0.8,
         y_max=1.4,
+        line_width_scale=0.8,
     ),
     "alternative_scaling": PlotConfig(
         separate_plot=False,
@@ -183,6 +258,8 @@ PRESETS = {
         show_model_size=False,
         y_min=0.4,
         y_max=1.6,
+        loss_alpha_mup=1.0,
+        loss_alpha_other=1.0,
     ),
     "tuned_tpp_panel_2_3": PlotConfig(
         separate_plot=True,
@@ -195,19 +272,54 @@ PRESETS = {
         y_min=0.8,
         y_max=1.6,
     ),
+    "compare_spectral_norm": PlotConfig(
+        separate_plot=False,
+        kinds_to_visualize=["mup"],
+        optim_to_visualize=["soap", "norm_soap", "muon", "norm_muon", "shampoo", "norm_shampoo"],
+        column_groups=[
+            ("SOAP", ["soap", "norm_soap"]),
+            ("Muon", ["muon", "norm_muon"]),
+            ("Shampoo", ["shampoo", "norm_shampoo"]),
+        ],
+        plot_legend=False,
+        legend_mode="norm",
+        legend_on_subplot=(0, 0),
+        color_mode="norm",
+        show_model_size=False,
+        y_min=0.8,
+        y_max=1.6,
+        subplot_wspace=0.05,
+        subplot_hspace=0.08,
+    ),
 }
+
+
+def is_norm_opt(opt_name: str) -> bool:
+    return opt_name.startswith("norm_")
+
+
+def resolve_color_mode(config: PlotConfig) -> str:
+    if config.color_mode:
+        return config.color_mode
+    return "optimizer" if config.separate_plot else "kind"
 
 
 def get_colors(config: PlotConfig) -> dict:
     """Get color mapping based on configuration."""
     colors = {}
+    color_mode = resolve_color_mode(config)
     for opt in config.optim_to_visualize:
         for kind in config.kinds_to_visualize:
             key = (opt, kind)
-            if config.separate_plot:
+            if color_mode == "optimizer":
                 colors[key] = OPT_COLORS.get(opt, "#000000")
-            else:
+            elif color_mode == "kind":
                 colors[key] = KIND_COLORS.get(kind, "#000000")
+            elif color_mode == "norm":
+                norm_key = "spectral_norm" if is_norm_opt(opt) else "no_norm"
+                colors[key] = NORM_COLORS[norm_key]
+            else:
+                raise ValueError(f"Unknown color mode: {color_mode}")
     return colors
 
 
@@ -425,11 +537,16 @@ def configure_style() -> None:
     sns.set_context("paper", font_scale=2.5)
 
 
-def build_legend_handles(config: PlotConfig) -> list:
+def build_legend_handles(config: PlotConfig, mode: Optional[str] = None) -> list:
     handles = []
+    if mode == "norm":
+        return [
+            Patch(facecolor=NORM_COLORS["no_norm"], edgecolor="none", label=NORM_LABELS["no_norm"]),
+            Patch(facecolor=NORM_COLORS["spectral_norm"], edgecolor="none", label=NORM_LABELS["spectral_norm"]),
+        ]
     if config.separate_plot:
         color_handles = [
-            Patch(facecolor=OPT_COLORS[name], edgecolor="none", label=name.capitalize())
+            Patch(facecolor=OPT_COLORS[name], edgecolor="none", label=DISPLAY_NAMES[name])
             for name in config.optim_to_visualize[::-1]
             if config.legends_to_show is None or name in config.legends_to_show
         ]
@@ -440,7 +557,7 @@ def build_legend_handles(config: PlotConfig) -> list:
                 [0], [0],
                 linestyle=linestyles[kind],
                 color="black",
-                linewidth=2,
+                linewidth=2 * config.line_width_scale,
                 label=KIND_LABELS[kind],
                 marker=markers[kind],
                 markersize=config.markersize,
@@ -451,7 +568,14 @@ def build_legend_handles(config: PlotConfig) -> list:
             for kind in config.kinds_to_visualize[::-1]
             if config.legends_to_show is None or kind in config.legends_to_show
         ]
-        handles = color_handles + linestyle_handles
+        if mode is None or mode == "all":
+            handles = color_handles + linestyle_handles
+        elif mode == "optimizer":
+            handles = color_handles
+        elif mode == "linestyle":
+            handles = linestyle_handles
+        else:
+            raise ValueError(f"Unknown legend mode: {mode}")
     else:
         handles = [
             Patch(facecolor=KIND_COLORS[kind], edgecolor="none", label=KIND_LABELS[kind])
@@ -459,6 +583,28 @@ def build_legend_handles(config: PlotConfig) -> list:
             if config.legends_to_show is None or kind in config.legends_to_show
         ]
     return handles
+
+
+def extract_model_size_ticks(group: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
+    ordered = group.sort_values("D")
+    ticks = ordered["flops"].to_numpy(dtype=float)
+    count = min(len(ticks), len(MODEL_SIZE_LABELS))
+    return ticks[:count], MODEL_SIZE_LABELS[:count]
+
+
+def add_model_size_axis(ax: plt.Axes, group: pd.DataFrame) -> None:
+    ticks, labels = extract_model_size_ticks(group)
+    if len(ticks) == 0:
+        return
+    top_ax = ax.twiny()
+    top_ax.set_xscale("log")
+    top_ax.set_xlim(ax.get_xlim())
+    top_ax.set_xticks(ticks)
+    top_ax.set_xticklabels(labels)
+    top_ax.tick_params(axis="x", which="major", direction="in", pad=-32)
+    top_ax.tick_params(axis="x", which="minor", direction="in", pad=-32)
+    top_ax.xaxis.set_minor_locator(ticker.NullLocator())
+    top_ax.grid(False, axis="x")
 
 
 def plot_loss_vs_compute(df: pd.DataFrame, opt_to_axes: dict, config: PlotConfig) -> None:
@@ -483,39 +629,27 @@ def plot_loss_vs_compute(df: pd.DataFrame, opt_to_axes: dict, config: PlotConfig
             if config.show_trajectories:
                 for _, row in ordered.iterrows():
                     history = row["history"]
-                    ax.plot(history[COMPUTE_COL], history["eval_loss"], lw=1.2, alpha=0.4, color=color)
+                    ax.plot(
+                        history[COMPUTE_COL],
+                        history["eval_loss"],
+                        lw=1.2 * config.line_width_scale,
+                        alpha=0.4,
+                        color=color,
+                    )
 
             ax.plot(
                 ordered["flops"],
                 ordered["eval_loss"],
                 linestyle=linestyle,
                 color=color,
-                alpha=0.95 if kind == "mup" else 0.6,
-                label=f"{DISPLAY_NAMES.get(opt, opt.capitalize())} ({label})",
-                lw=2.5 if kind == "mup" else 1.8,
+                alpha=config.loss_alpha_mup if kind == "mup" else config.loss_alpha_other,
+                label=f"{DISPLAY_NAMES[opt]} ({label})",
+                lw=(2.5 if kind == "mup" else 1.8) * config.line_width_scale,
                 marker=marker,
                 markeredgecolor="black",
                 markeredgewidth=config.edgewidth,
                 markersize=config.markersize if kind == "mup" else config.markersize + 1.5,
             )
-
-            if config.show_model_size and opt == "adam" and kind == "mup":
-                param_count = ["190M", "380M", "640M", "1.4B"]
-                for i, (_, row) in enumerate(ordered.iterrows()):
-                    if i == 0:
-                        offset = (10, 16)
-                    elif i < 3:
-                        offset = (14, 16)
-                    else:
-                        offset = (-2, 20)
-                    ax.annotate(
-                        param_count[i],
-                        (row["flops"], row["eval_loss"]),
-                        textcoords="offset points",
-                        xytext=offset,
-                        ha="center",
-                        fontsize=20,
-                    )
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -524,10 +658,11 @@ def plot_loss_vs_compute(df: pd.DataFrame, opt_to_axes: dict, config: PlotConfig
         compute_label = "Compute" if COMPUTE_COL == "compute" else "Non-embed compute"
         ax.set_xlabel(f"{compute_label} (FLOPs)")
         ax.set_ylabel("Loss")
-        ax.set_xlim(3_000 * 1e15, 300_000 * 1e15)
+        ax.set_xlim(2_700 * 1e15, 330_000 * 1e15)
 
     if config.plot_legend:
-        legend_handles = build_legend_handles(config)
+        legend_mode = config.legend_loss
+        legend_handles = build_legend_handles(config, mode=legend_mode)
         legend = ax.legend(handles=legend_handles, loc="lower left", frameon=False, ncol=1, fontsize=20)
         ax.add_artist(legend)
 
@@ -536,6 +671,30 @@ def plot_loss_vs_compute(df: pd.DataFrame, opt_to_axes: dict, config: PlotConfig
     ax.set_yticks(np.linspace(y_min, y_max, num=round((y_max - y_min) / 0.2 + 1)))
     ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.1f"))
     ax.yaxis.set_minor_locator(ticker.NullLocator())
+
+    if config.show_model_size:
+        if config.separate_plot:
+            main_ax = next(iter(opt_to_axes.values()))
+            group = df[(df["opt"] == "adam") & (df["kind"] == "mup")]
+            if group.empty:
+                for opt in config.optim_to_visualize:
+                    group = df[(df["opt"] == opt) & (df["kind"] == "mup")]
+                    if not group.empty:
+                        break
+            if not group.empty:
+                add_model_size_axis(main_ax, group)
+        else:
+            axis_to_opts = defaultdict(list)
+            for opt, ax in opt_to_axes.items():
+                axis_to_opts[ax].append(opt)
+            for ax, opts in axis_to_opts.items():
+                group = pd.DataFrame()
+                for opt in opts:
+                    group = df[(df["opt"] == opt) & (df["kind"] == "mup")]
+                    if not group.empty:
+                        break
+                if not group.empty:
+                    add_model_size_axis(ax, group)
 
 
 def plot_compute_multiplier(
@@ -579,28 +738,10 @@ def plot_compute_multiplier(
                 linestyle=linestyles[kind],
                 color=color,
                 markersize=config.markersize,
-                linewidth=2 if kind == "mup" else 2.3,
+                linewidth=(2 if kind == "mup" else 2.3) * config.line_width_scale,
                 markeredgecolor="black",
                 markeredgewidth=config.edgewidth,
             )
-
-            if config.show_model_size and opt == "muon" and kind == "mup":
-                param_count = ["190M", "380M", "640M", "1.4B"]
-                for i, (_, row) in enumerate(ordered.iterrows()):
-                    if i == 0:
-                        offset = (15, 16)
-                    elif i < 3:
-                        offset = (0, 16)
-                    else:
-                        offset = (-13, 18)
-                    ax.annotate(
-                        param_count[i],
-                        (row["flops"], ys[i]),
-                        textcoords="offset points",
-                        xytext=offset,
-                        ha="center",
-                        fontsize=20,
-                    )
 
         ax.set_xscale("log")
 
@@ -608,13 +749,39 @@ def plot_compute_multiplier(
             compute_label = "Compute" if COMPUTE_COL == "compute" else "Non-embed compute"
             ax.set_xlabel(f"{compute_label} (FLOPs)")
             ax.set_ylabel("Compute multiplier")
-            ax.set_ylim(config.y_min - 0.15, config.y_max + 0.15)
+            ax.set_xlim(2_700 * 1e15, 330_000 * 1e15)
+            ax.set_ylim(config.y_min - 0.15, config.y_max + 0.20)
             ax.set_yticks(np.linspace(config.y_min, config.y_max, num=round((config.y_max - config.y_min) / 0.2 + 1)))
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.1f"))
             ax.yaxis.set_minor_locator(ticker.NullLocator())
 
+    if config.show_model_size:
+        if config.separate_plot:
+            main_ax = next(iter(opt_to_ax.values()))
+            group = df[(df["opt"] == "muon") & (df["kind"] == "mup")]
+            if group.empty:
+                for opt in config.optim_to_visualize:
+                    group = df[(df["opt"] == opt) & (df["kind"] == "mup")]
+                    if not group.empty:
+                        break
+            if not group.empty:
+                add_model_size_axis(main_ax, group)
+        else:
+            axis_to_opts = defaultdict(list)
+            for opt, ax in opt_to_ax.items():
+                axis_to_opts[ax].append(opt)
+            for ax, opts in axis_to_opts.items():
+                group = pd.DataFrame()
+                for opt in opts:
+                    group = df[(df["opt"] == opt) & (df["kind"] == "mup")]
+                    if not group.empty:
+                        break
+                if not group.empty:
+                    add_model_size_axis(ax, group)
+
     if config.plot_legend:
-        legend_handles = build_legend_handles(config)
+        legend_mode = config.legend_multiplier
+        legend_handles = build_legend_handles(config, mode=legend_mode)
         legend = ax.legend(handles=legend_handles, loc="lower left", frameon=False, ncol=1, fontsize=20)
         ax.add_artist(legend)
 
@@ -652,50 +819,88 @@ def generate_separate_plots(df: pd.DataFrame, loss_to_compute: dict, config: Plo
 
 
 def generate_combined_plot(df: pd.DataFrame, loss_to_compute: dict, config: PlotConfig, output_dir: Path) -> None:
-    opt_num = len(config.optim_to_visualize)
+    groups = config.column_groups
+    opt_num = len(groups) if groups else len(config.optim_to_visualize)
     fig, axs = plt.subplots(2, opt_num, figsize=(6 * opt_num / 1.5, 12 / 1.5), dpi=300, sharex=True, sharey="row")
+
+    baseline_pair = COMPUTE_MULTIPLIER_BASELINES[COMPUTE_MULTIPLIER_SERIES[0]]
+    baseline_group = df[(df["opt"] == baseline_pair[0]) & (df["kind"] == baseline_pair[1])]
+    if baseline_group.empty:
+        baseline_flops = np.sort(df["flops"].unique())
+    else:
+        baseline_flops = np.sort(baseline_group["flops"].unique())
 
     opt_to_ax_0 = {}
     opt_to_ax_1 = {}
-    for i, opt in enumerate(config.optim_to_visualize):
-        opt_to_ax_0[opt] = axs[0, i]
-        opt_to_ax_1[opt] = axs[1, i]
-        axs[0, i].set_title(DISPLAY_NAMES.get(opt, opt.capitalize()))
+    if groups:
+        for i, (title, opts) in enumerate(groups):
+            ax0 = axs[0, i]
+            ax1 = axs[1, i]
+            ax0.set_title(title)
+            for opt in opts:
+                opt_to_ax_0[opt] = ax0
+                opt_to_ax_1[opt] = ax1
 
-        all_compute = df["flops"].unique()
-        axs[1, i].plot(
-            all_compute,
-            [1 for _ in all_compute],
-            linestyle="-",
-            color="black",
-            lw=1.5,
-            marker="o",
-            markersize=config.markersize,
-        )
+            ax1.plot(
+                baseline_flops,
+                [1 for _ in baseline_flops],
+                linestyle="-",
+                color="black",
+                lw=1.5 * config.line_width_scale,
+                marker="o",
+                markersize=config.markersize,
+            )
+    else:
+        for i, opt in enumerate(config.optim_to_visualize):
+            opt_to_ax_0[opt] = axs[0, i]
+            opt_to_ax_1[opt] = axs[1, i]
+            axs[0, i].set_title(DISPLAY_NAMES[opt])
+
+            axs[1, i].plot(
+                baseline_flops,
+                [1 for _ in baseline_flops],
+                linestyle="-",
+                color="black",
+                lw=1.5 * config.line_width_scale,
+                marker="o",
+                markersize=config.markersize,
+            )
 
     plot_loss_vs_compute(df, opt_to_ax_0, config)
     plot_compute_multiplier(df, loss_to_compute, opt_to_ax_1, config)
 
     axs[0, 0].set_ylabel("Loss")
     axs[1, 0].set_ylabel("Compute multiplier")
-    axs[1, 1].set_xlabel(f"{'Compute' if COMPUTE_COL == 'compute' else 'Non-embed compute'} (FLOPs)")
+    compute_label = "Compute" if COMPUTE_COL == "compute" else "Non-embed compute"
+    fig.text(0.5, 0.02, f"{compute_label} (FLOPs)", ha="center")
 
     axs[1, 0].set_ylim(config.y_min, config.y_max)
 
-    legend_handles = build_legend_handles(config)
-    legend_handles += [Patch(facecolor="black", edgecolor="none", label="Baseline")]
-
-    legend = fig.legend(
-        handles=legend_handles,
-        ncol=int(np.ceil(len(legend_handles) / 2)),
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.1),
-        frameon=False,
-    )
+    legend = None
+    if config.legend_on_subplot is not None:
+        row, col = config.legend_on_subplot
+        legend_handles = build_legend_handles(config, mode=config.legend_mode)
+        legend = axs[row, col].legend(
+            handles=legend_handles,
+            loc="lower left",
+            frameon=False,
+        )
+    elif config.plot_legend:
+        legend_handles = build_legend_handles(config, mode=config.legend_mode)
+        legend_handles += [Patch(facecolor="black", edgecolor="none", label="Baseline")]
+        legend = fig.legend(
+            handles=legend_handles,
+            ncol=int(np.ceil(len(legend_handles) / 2)),
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.1),
+            frameon=False,
+        )
 
     fig.tight_layout()
+    fig.subplots_adjust(wspace=config.subplot_wspace, hspace=config.subplot_hspace)
     path = output_dir / f"{COMPUTE_COL}_whole.pdf"
-    fig.savefig(path, bbox_extra_artists=[legend], bbox_inches="tight")
+    extra_artists = [legend] if legend is not None else None
+    fig.savefig(path, bbox_extra_artists=extra_artists, bbox_inches="tight")
     print(f"Saved combined plot to {path}")
     plt.close(fig)
 
